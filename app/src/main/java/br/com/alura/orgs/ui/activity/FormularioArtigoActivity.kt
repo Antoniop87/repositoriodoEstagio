@@ -1,5 +1,6 @@
 package br.com.alura.orgs.ui.activity
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import br.com.alura.orgs.database.AppDatabase
@@ -13,10 +14,21 @@ class FormularioArtigoActivity :
         ArtigosFormularioActivityBinding.inflate(layoutInflater)
     }
 
+    private var idArtigo = 0L
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        title = "Postar Artigo"
         setContentView(binding.root)
         configuraBotaoSalvar()
+
+        intent.getParcelableExtra<Artigo>(CHAVE_ARTIGO)?.let { artigoCarregado ->
+            title = "Editar Artigo"
+            idArtigo = artigoCarregado.id
+            binding.edittextArtigoTitulo.setText(artigoCarregado.titulo)
+            binding.edittextArtigoResumo.setText(artigoCarregado.resumo)
+            binding.edittextArtigoCompleto.setText(artigoCarregado.artigo)
+        }
     }
 
     private fun configuraBotaoSalvar() {
@@ -27,7 +39,11 @@ class FormularioArtigoActivity :
 
         botaoSalvar.setOnClickListener {
             val artigoNovo = criaArtigo()
-            artigoDao.salva(artigoNovo)
+            if(idArtigo > 0){
+                artigoDao.edita(artigoNovo)
+            } else {
+                artigoDao.salva(artigoNovo)
+            }
             finish()
         }
     }
@@ -42,6 +58,7 @@ class FormularioArtigoActivity :
 
 
         return Artigo(
+                id = idArtigo,
                 titulo = titulo,
                 resumo = resumo,
                 artigo = artigoCompleto
